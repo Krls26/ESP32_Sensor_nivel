@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Distancia</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            background-color: #4CAF50;
+            color: white;
+            margin: 0;
+            padding: 15px;
+        }
+        .container {
+            padding: 20px;
+        }
+        .status {
+            margin: 20px 0;
+            font-size: 20px;
+        }
+        .status span {
+            font-weight: bold;
+        }
+        .bar {
+            width: 80%;
+            max-width: 500px;
+            height: 30px;
+            margin: 20px auto;
+            background: #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+        .fill {
+            height: 100%;
+            background: #4CAF50;
+            width: 0%;
+            transition: width 0.3s ease-in-out;
+        }
+        footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <h1>Monitor de Distancia - ESP32</h1>
+    <div class="container">
+        <div class="status">
+            <p>Distancia actual: <span id="distance">--</span> cm</p>
+        </div>
+        <div class="bar">
+            <div class="fill" id="fill"></div>
+        </div>
+        <p>Nivel del tanque</p>
+    </div>
+    <footer>
+        <p>Datos obtenidos en tiempo real desde el ESP32</p>
+    </footer>
+    <script>
+        setInterval(() => {
+            fetch('/distance')
+                .then(response => response.json())
+                .then(data => {
+                    const distance = data.distance.toFixed(2);
+                    document.getElementById('distance').textContent = distance;
+
+                    // Actualiza la barra gráfica
+                    const fill = document.getElementById('fill');
+                    const maxDistance = 17.5; // Máximo en cm
+                    const percentage = Math.min((distance / maxDistance) * 100, 100);
+
+                    fill.style.width = `${percentage}%`;
+
+                    // Cambia el color si está por debajo de 20 cm
+                    if (distance < 5) {
+                        fill.style.backgroundColor = "#FF0000"; // Rojo
+                    } else {
+                        fill.style.backgroundColor = "#4CAF50"; // Verde
+                    }
+                })
+                .catch(err => console.error("Error al obtener los datos:", err));
+        }, 1000);
+    </script>
+</body>
+</html>
